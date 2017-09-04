@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<h4>发布-订阅模式（观察者模式）</h4>
+	<div>
+		<button id="count">点我</button>
+		<div id="show"></div>
+	</div>
+
+<script>
+var saleOffices = {};	//定义售楼处
+
+saleOffices.clientList = {};	//定义客户列表
+
+saleOffices.listen = function(key, fn) {	//录入客户信息 
+	if(!saleOffices.clientList[key]) {
+		saleOffices.clientList[key] = [];
+	}
+	saleOffices.clientList[key].push(fn);
+}
+
+saleOffices.trigger = function() {	//发布订阅消息
+	var key = Array.prototype.shift.call(arguments),
+	fns = saleOffices.clientList[key];
+	if(!fns || fns.length === 0) {
+		return false;
+	}
+	for(var i = 0, l = fns.length; i < l; i++) {
+		fns[i].apply(this, arguments);
+	}
+}
+
+saleOffices.listen('squareMeter88', function(price) {
+	console.log('squareMeter88', price);
+});
+saleOffices.listen('squareMeter100', function(price) {
+	console.log('squareMeter100', price);
+});
+
+saleOffices.trigger('squareMeter88', 10000);
+saleOffices.trigger('squareMeter100', 20000);
+
+
+//更为通用的发布订阅模式
+var sp = {
+	clientList: [],
+	listen: function(key, fn) {
+		if(!this.clientList[key]) {
+			this.clientList[key] = [];
+		}
+		this.clientList[key].push(fn);
+	},
+	trigger: function() {
+		var key = Array.prototype.shift.call(arguments),
+		fns = this.clientList[key];
+		if(!fns || fns.length === 0) {
+			return false;
+		}
+		for(var i = 0, l = fns.length; i < l; i++) {
+			fns[i].apply(this, arguments);
+		}
+	},
+	remove: function(key, fn) {	//删除订阅
+		var fns = this.clientList[key];
+		if(!fns) {
+			return false;
+		}
+		if(!fn) {	// 如果没有传入具体的回调函数，表示需要取消 key 对应消息的所有订阅
+			fns && (fns.length = 0);
+		}else {
+			for(var l = fns.length - 1; l >= 0; l--) {	// 反向遍历订阅的回调函数列表
+				var _fn = fns[l];
+				if(_fn === fn) {
+					fns.splice(l, 1);	//删除订阅者的回调函数
+				}
+			}
+		}
+	}
+}
+
+var installSP = function(obj) {	//将普通对象变成订阅发布模式
+	for(var i in sp) {
+		obj[i] = sp[i];
+	}
+}
+
+var dep = {};
+installSP(dep);
+dep.listen('a', function(t) {
+	console.log('a', t);
+});
+dep.listen('b', function(t) {
+	console.log('b', t);
+});
+dep.listen('c', function(t) {
+	console.log('c', t);
+});
+dep.trigger('a', 123);
+dep.trigger('b', 456);
+dep.trigger('c', 789);
+
+dep.listen( 'haha', fn1 = function( price ){ // 小明订阅消息
+	console.log( 'fn1', '价格= ' + price );
+});
+dep.listen( 'haha', fn2 = function( price ){ // 小红订阅消息
+	console.log( 'fn2', '价格= ' + price );
+});
+
+dep.remove( 'haha', fn1 ); // 删除小明的订阅
+dep.trigger( 'haha', 2000000 ); // 输出： 2000000
+
+
+//全局的发布订阅模式
+var Event = (function(){
+	var clientList = {},
+		listen,
+		trigger,
+		remove;
+	listen = function( key, fn ){
+		if ( !clientList[ key ] ){
+			clientList[ key ] = [];
+		}
+		clientList[ key ].push( fn );
+	};
+	trigger = function(){
+		var key = Array.prototype.shift.call( arguments ),
+			fns = clientList[ key ];
+		if ( !fns || fns.length === 0 ){
+			return false;
+		}
+		for( var i = 0, fn; fn = fns[ i++ ]; ){
+			fn.apply( this, arguments );
+		}
+	};
+	remove = function( key, fn ){
+		var fns = clientList[ key ];
+		if ( !fns ){
+			return false;
+		}
+		if ( !fn ){
+			fns && ( fns.length = 0 );
+		}else{
+			for ( var l = fns.length - 1; l >=0; l-- ){
+				var _fn = fns[ l ];
+				if ( _fn === fn ){
+					fns.splice( l, 1 );
+				}
+			}
+		}
+	};
+	return {
+		listen: listen,
+		trigger: trigger,
+		remove: remove
+	}
+})();
+
+//模块之间的通信
+var a = (function(){
+	var count = 0;
+	var button = document.getElementById( 'count' );
+	button.onclick = function(){
+		Event.trigger( 'add', count++ );
+	}
+})();
+
+var b = (function(){
+	var div = document.getElementById( 'show' );
+	Event.listen( 'add', function( count ){
+		div.innerHTML = count;
+	});
+})();
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<h4>this call apply</h4>
+
+<script>
+
+Function.prototype.haha = function() {
+	var self = this,
+		context = [].shift.call(arguments),
+		args = [].slice.call(arguments);
+
+		
+	console.log(args)
+
+	return function() {
+
+		console.log(arguments)
+		return self.apply( context, [].concat.call(args, [].slice.call(arguments)) );
+	}
+}
+
+var obj = {
+	name: 'Michael'
+}
+
+var test = function(a, b, c, d) {
+	console.log(this.name);
+	console.log(a, b, c, d);
+}.haha(obj, 1, 2);
+
+test(5, 6);
+	
+
+</script>
+</body>
+</html>

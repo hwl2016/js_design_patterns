@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<h4>命令模式</h4>
+	<div>
+		<button id="btn1">btn1</button>
+		<button id="btn2">btn2</button>
+		<button id="btn3">btn3</button>
+	</div>
+
+<script>
+var btn1 = document.getElementById('btn1')
+var btn2 = document.getElementById('btn2')
+var btn3 = document.getElementById('btn3')
+
+var setCommand = function(btn, command) {
+	btn.onclick = function() {
+		command.execute();
+	}
+}
+
+var MenuBar = {
+	refresh: function() {
+		console.log('refresh');
+	}
+}
+
+var SubMenu = {
+	add: function() {
+		console.log('add');
+	},
+	remove: function() {
+		console.log('remove');
+	}
+}
+
+// var RefreshMenuBarCommand = function(receiver) {
+// 	this.receiver = receiver;
+// }
+// RefreshMenuBarCommand.prototype.execute = function() {
+// 	this.receiver.refresh();
+// }
+
+var RefreshMenuBarCommand = function(receiver) {
+	return {
+		execute: function() {
+			receiver.refresh();
+		}
+	}
+}
+
+var AddSubMenuCommand = function(receiver) {
+	this.receiver = receiver;
+}
+AddSubMenuCommand.prototype.execute = function() {
+	this.receiver.add();
+}
+
+var RemoveSubMenuCommand = function(receiver) {
+	this.receiver = receiver;
+}
+RemoveSubMenuCommand.prototype.execute = function() {
+	this.receiver.remove();
+}
+
+var refreshMenuBarCommand = RefreshMenuBarCommand(MenuBar);
+var addSubMenuCommand = new AddSubMenuCommand(SubMenu);
+var removeSubMenuCommand = new RemoveSubMenuCommand(SubMenu);
+
+setCommand(btn1, refreshMenuBarCommand);
+setCommand(btn2, addSubMenuCommand);
+setCommand(btn3, removeSubMenuCommand);
+
+
+</script>
+</body>
+</html>

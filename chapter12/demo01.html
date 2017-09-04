@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>享元模式</title>
+</head>
+<body>
+	<h4>享元模式</h4>
+
+	<script>
+		var Model = function(sex) {
+			this.sex = sex;
+		}
+
+		Model.prototype.takePhoto = function() {
+			console.log('sex: ' + this.sex + ', underware:' + this.underware);
+		}
+
+		// 对象只需创建一次 在循环体中共享
+		var maleModel = new Model('male');
+		var femaleModel = new Model('female');
+
+		for(var i = 0; i < 10; i++) {
+			maleModel.underware = i;
+			maleModel.takePhoto();
+		}
+
+		for(var i = 0; i < 10; i++) {
+			femaleModel.underware = i;
+			femaleModel.takePhoto();
+		}
+
+	</script>
+</body>
+</html>

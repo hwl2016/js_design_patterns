@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<h4>面向对象---封装</h4>
+	<div>
+		<img srcset="img/horse4.jpg 400w,
+					 img/horse5.jpg 500w,
+					 img/horse6.jpg 800w"
+			 src="img/horse5.jpg" alt=""
+			 sizes="(min-width: 33em) 33em, 100vw">
+	</div>
+
+<script>
+
+	var myObj = (function() {
+		var __name = 'Michael';
+		return {
+			getName: function() {
+				return __name;
+			},
+			setName: function(name) {
+				__name = name;
+			}
+		}
+	})();
+
+	console.log( myObj.__name );
+	console.log( myObj.getName() );
+
+	myObj.setName('Jack');
+
+	console.log( myObj.getName() );
+
+</script>
+</body>
+</html>

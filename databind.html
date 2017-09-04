@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<h4>vue的数据双向绑定</h4>
+	<div id="box">
+		<input type="text" id="a">
+		<span id="b"></span>
+	</div>
+
+	<div id="bd">
+		<input type="text" v-model="name">
+		{{ name }}
+	</div>
+
+<script>
+
+/*简单的数据绑定*/
+var obj = {};
+var box = document.getElementById('box');
+var a = document.getElementById('a');
+var b = document.getElementById('b');
+Object.defineProperty(obj, 'hello', {
+	get: function() {
+		console.log('getter');
+		// return this.hello;
+	},
+	set: function(value) {
+		console.log('setter');
+		a.value = value;
+		b.innerHTML = value;
+	}
+});
+
+box.addEventListener('keyup', function(e) {
+	obj.hello = e.target.value;
+})
+
+
+/*===============VUE的数据绑定==============*/
+
+function compile(node, vm) {	//对模板进行编译
+	var reg = /\{\{(.*)\}\}/;
+	if(node.nodeType === 1) {	//节点为元素类型
+		var attr = node.attributes;	
+		//解析属性
+		for(var i = 0, l = attr.length; i < l; i++) {
+			if(attr[i].nodeName == 'v-model') {
+				var name = attr[i].nodeValue;
+				node.addEventListener('input', function(e) {
+					vm[name] = e.target.value;	//给相应的属性赋值，出发set方法
+				});
+				node.value = vm[name];
+				node.removeAttribute('v-model');
+			}
+		}
+	}
+	if(node.nodeType === 3) {	//节点是text
+		if(reg.test(node.nodeValue)) {
+			var name = RegExp.$1;
+			name = name.trim();
+			// node.nodeValue = vm[name];
+			new Watcher(vm, node, name);
+		}
+	}
+}
+
+//在编译HTML过程中，为每个与data关联的节点生成一个Watcher
+function Watcher(vm, node, name) {
+	Dept.target = this;
+	this.vm = vm;
+	this.node = node;
+	this.name = name;
+	this.update();
+	Dept.target = null;
+}
+
+Watcher.prototype = {
+	update: function() {
+		this.get();
+		this.node.nodeValue = this.value;
+	},
+	get: function() {	//获取data中的属性值
+		this.value = this.vm[this.name];	//出发Object.defineProperty get方法获取属性值
+	}
+}
+
+function Dept() {
+	this.subs = [];
+}
+
+Dept.prototype = {
+	addSub: function(sub) {
+		this.subs.push(sub);
+	},
+	notify: function() {
+		this.subs.forEach(function(sub) {
+			sub.update();
+		})
+	}
+}
+
+//在DocumentFlagment中进行dom操作，编译
+function nodeToFragment(node, vm) {
+	var flag = document.createDocumentFragment();
+	var child;
+	while(child = node.firstChild) {
+		compile(child, vm);
+		flag.appendChild(child);
+	}
+	return flag;
+}
+
+//封装设置对象访问器属性的方法
+function defineReactive(obj, key, val) {
+	var dept = new Dept();	//创建主题对象
+	Object.defineProperty(obj, key, {
+		get: function() {
+			if(Dept.target) {
+				dept.addSub(Dept.target);	//为每个属性添加订阅者
+			}
+			return val;
+		},
+		set: function(newVal) {
+			if(newVal === val) {
+				return
+			}
+			val = newVal;
+			dept.notify();	//作为发布者发出通知
+		}
+	})
+}
+
+function observe(obj, vm) {
+	Object.keys(obj).forEach(function(key) {
+		defineReactive(vm, key, obj[key]);
+	})
+}
+
+function Vue(options) {
+	this.data = options.data;
+	var data = this.data;
+
+	observe(data, this);
+
+	var id = options.el;
+	var ele = document.getElementById(id);
+	var dom = nodeToFragment(ele, this);
+	ele.appendChild(dom);	//编译完后将dom返回页面渲染
+}
+
+
+//订阅-发布模式（观察者模式）  
+//发布者发布通知 ==> 主题对象收到通知并推送给订阅者 ==> 订阅者执行相应操作
+
+// 一个主题对象
+/*function Dep() {
+	this.subs = [sub1, sub2, sub3];
+}
+
+Dep.prototype.notify = function() {
+	this.subs.forEach(function(sub) {
+		sub.update();
+	})
+}
+
+//一个发布者publisher
+var pub = {
+	publish: function(dep) {
+		dep.notify();
+	}
+}
+
+//三个订阅者subscribers
+var sub1 = {
+	update: function() {
+		console.log(1)
+	}
+};
+var sub2 = {
+	update: function() {
+		console.log(2)
+	}
+};
+var sub3 = {
+	update: function() {
+		console.log(3)
+	}
+};
+
+var dep = new Dep();
+pub.publish(dep);*/
+
+
+var vm = new Vue({
+	el: 'bd',
+	data: {
+		name: 'Michael'
+	}
+})
+
+
+
+
+</script>
+</body>
+</html>

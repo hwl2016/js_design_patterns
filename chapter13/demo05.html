@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<h4>用职责链模式获取文件上传对象</h4>
+
+<script src="../jquery.js"></script>
+<script>
+
+	function flashChecker() {
+	    var hasFlash = 0; //是否安装了flash
+	    var flashVersion = 0; //flash版本
+	    if (document.all) {
+	      var swf = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+	      if (swf) {
+	        hasFlash = 1;
+	        VSwf = swf.GetVariable("$version");
+	        flashVersion = parseInt(VSwf.split(" ")[1].split(",")[0]);
+	      }
+	    } else {
+	      if (navigator.plugins && navigator.plugins.length > 0) {
+	        var swf = navigator.plugins["Shockwave Flash"];
+	        if (swf) {
+	          hasFlash = 1;
+	          var words = swf.description.split(" ");
+	          for (var i = 0; i < words.length; ++i) {
+	            if (isNaN(parseInt(words[i]))) continue;
+	            flashVersion = parseInt(words[i]);
+	          }
+	        }
+	      }
+	    }
+	    return { f: !!hasFlash, v: flashVersion };
+    }
+
+
+	function supportFlash() {
+		return flashChecker().f;
+	}
+
+	var getActiveUploadObj = function(){
+		try{
+			return new ActiveXObject("TXFTNActiveX.FTNUpload"); // IE 上传控件
+		}catch(e){
+			return 'nextSuccessor' ;
+		}
+	};
+	var getFlashUploadObj = function(){
+		if ( supportFlash() ){
+			var str = '<object type="application/x-shockwave-flash"></object>';
+			return $( str ).appendTo( $('body') );
+		}
+		return 'nextSuccessor' ;
+	};
+	var getFormUpladObj = function(){
+		return $( '<form><input name="file" type="file"/></form>' ).appendTo( $('body') );
+	};
+
+	Function.prototype.after = function( fn ){
+		var self = this;
+		return function(){
+			var ret = self.apply( this, arguments );
+			if ( ret === 'nextSuccessor' ){
+				return fn.apply( this, arguments );
+			}
+			return ret;
+		}
+	};
+
+	var getUploadObj = getActiveUploadObj.after( getFlashUploadObj ).after( getFormUpladObj );
+
+	console.log( getUploadObj() );
+</script>
+</body>
+</html>
