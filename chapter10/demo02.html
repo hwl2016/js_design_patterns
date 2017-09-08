@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>扫描文件夹</title>
+</head>
+<body>
+	<h4>扫描文件夹</h4>
+<script>
+	/******************************* Folder ******************************/
+	var Folder = function( name ){
+		this.name = name;
+		this.files = [];
+	};
+	Folder.prototype.add = function( file ){
+		this.files.push( file );
+	};
+	Folder.prototype.scan = function(){
+		console.log( '开始扫描文件夹: ' + this.name );
+		for ( var i = 0, file, files = this.files; file = files[ i++ ]; ){
+			file.scan();
+		}
+	};
+	/******************************* File ******************************/
+	var File = function( name ){
+		this.name = name;
+	};
+	File.prototype.add = function(){
+		throw new Error( '文件下面不能再添加文件' );
+	};
+	File.prototype.scan = function(){
+		console.log( '开始扫描文件: ' + this.name );
+	};
+
+	var book = new File('book');
+	var excel = new File('excel');
+	var pdf = new File('pdf');
+	var word = new File('word');
+	var ppt = new File('ppt');
+
+	var dir1 = new Folder('dir1');
+	var dir2 = new Folder('dir2');
+
+	dir1.add(book);
+	dir1.add(excel);
+	dir2.add(word);
+	dir2.add(ppt);
+
+	var folder = new Folder('资料');
+	folder.add(dir1);
+	folder.add(dir2);
+	folder.add(pdf);
+
+	folder.scan();
+
+</script>
+</body>
+</html>
