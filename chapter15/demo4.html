@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>装饰者模式</title>
+</head>
+<body>
+	<h4>装饰者模式</h4>
+	<h4>AOP 装饰函数</h4>
+	<p style="text-indent: 2em;">
+		给对象动态地增加职责的方式称为装饰者（decorator）模式。装饰者模式能够在不改变对象自身的基础上，在程序运行期间给对象动态地添加职责。
+	</p>
+	<p>
+		<button id="btn">button</button>
+	</p>
+
+<script>
+	// AOP 装饰函数
+	
+	Function.prototype.before = function( beforefn ){
+		var __self = this; // 保存原函数的引用
+		return function(){ // 返回包含了原函数和新函数的"代理"函数
+			beforefn.apply( this, arguments ); // 执行新函数，且保证 this 不被劫持，新函数接受的参数也会被原封不动地传入原函数，新函数在原函数之前执行
+			return __self.apply( this, arguments ); // 执行原函数并返回原函数的执行结果，并且保证 this 不被劫持
+		}
+	}
+	Function.prototype.after = function( afterfn ){
+		var __self = this;
+		return function(){
+			var ret = __self.apply( this, arguments );
+			afterfn.apply( this, arguments );
+			return ret;
+		}
+	};
+
+	document.getElementById = document.getElementById.before(function() {
+		console.log (1);
+	});
+	var button = document.getElementById( 'btn' );
+	console.log( button );
+
+
+	window.onload = function(){
+		console.log ('aaa');
+	}
+	window.onload = ( window.onload || function(){} ).after(function(){
+		console.log ('bbb');
+	}).after(function(){
+		console.log ('ccc');
+	}).after(function(){
+		console.log ('ddd');
+	});
+
+	// AOP的变体 不污染Function的原型
+	var before = function( fn, beforefn ){
+		return function(){
+			beforefn.apply( this, arguments );
+			return fn.apply( this, arguments );
+		}
+	}
+	var a = before(
+		function() {
+			console.log (3)
+		},
+		function() {
+			console.log (2)
+		}
+	);
+	a = before( a, function(){
+		console.log (1);
+	});
+	a();
+		
+	
+</script>
+</body>
+</html>

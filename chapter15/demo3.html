@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>装饰者模式</title>
+</head>
+<body>
+	<h4>装饰者模式</h4>
+	<p style="text-indent: 2em;">
+		给对象动态地增加职责的方式称为装饰者（decorator）模式。装饰者模式能够在不改变对象自身的基础上，在程序运行期间给对象动态地添加职责。
+	</p>
+	<p>
+		<button id="btn">button</button>
+	</p>
+
+<script>
+	// 装饰函数
+	
+	/*var a = function(){
+		console.log (1);
+	}
+	var _a = a;	// 备份一下
+	a = function(){
+		_a();
+		console.log (2);
+	}
+	a();*/
+
+	/*window.onload = function(){
+		console.log (1);
+	}
+	var _onload = window.onload || function(){};
+	window.onload = function(){
+		_onload();
+		console.log (2);
+	}*/
+
+	// 装饰函数的缺点： 1、必须维护_onload 这个中间变量；2、 this 被劫持的问题
+	var _getElementById = document.getElementById;
+	document.getElementById = function( id ){
+		console.log (1);
+
+		// _getElementById 是一个全局函数，
+		// 当调用一个全局函数时， this 是指向 window 的，而 document.getElementById 方法的内部实现需要
+		// 使用 this 引用， this 在这个方法内预期是指向 document，而不是 window, 这是错误发生的原因
+
+		// return _getElementById( id ); // 输出： Uncaught TypeError: Illegal invocation  this被劫持了
+
+		return _getElementById.apply( document, arguments );	// 改进版
+	}
+	var button = document.getElementById( 'btn' );
+	
+</script>
+</body>
+</html>

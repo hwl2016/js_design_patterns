@@ -6,36 +6,39 @@
 </head>
 <body>
 	<h4>装饰者模式</h4>
+	<p style="text-indent: 2em;">
+		给对象动态地增加职责的方式称为装饰者（decorator）模式。装饰者模式能够在不改变对象自身的基础上，在程序运行期间给对象动态地添加职责。
+	</p>
 
+<script>
+	// JavaScript 的装饰者
 	
+	var plane = {
+		fire: function(){
+			console.log( '发射普通子弹' );
+		}
+	}
+	var missileDecorator = function(){
+		console.log( '发射导弹' );
+	}
+	var atomDecorator = function(){
+		console.log( '发射原子弹' );
+	}
 
-	<script>
-		var plane = {
-			fire: function(){
-				console.log( '发射普通子弹' );
-			}
-		}
-		var missileDecorator = function(){
-			console.log( '发射导弹' );
-		}
-		var atomDecorator = function(){
-			console.log( '发射原子弹' );
-		}
+	var fire1 = plane.fire;
+	plane.fire = function(){
+		fire1();
+		missileDecorator();
+	}
 
-		var fire1 = plane.fire;
-		plane.fire = function(){
-			fire1();
-			missileDecorator();
-		}
+	var fire2 = plane.fire;
+	plane.fire = function(){
+		fire2();
+		atomDecorator();
+	}
 
-		var fire2 = plane.fire;
-		plane.fire = function(){
-			fire2();
-			atomDecorator();
-		}
-
-		plane.fire();
-		
-	</script>
+	plane.fire();
+	
+</script>
 </body>
 </html>
