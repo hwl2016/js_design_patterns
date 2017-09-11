@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>适配器模式</title>
+</head>
+<body>
+	<h4>适配器模式</h4>
+	<p>适配器模式、装饰者模式、代理模式、外观模式都是包装模式，注意他们之间的区别</p>
+
+<script>
+	var googleMap = {
+		show: function(){
+			console.log( '开始渲染谷歌地图' );
+		}
+	};
+	var baiduMap = {
+		display: function(){
+			console.log( '开始渲染百度地图' );
+		}
+	};
+	var baiduMapAdapter = {
+		show: function(){
+			return baiduMap.display();
+		}
+	};
+	var renderMap = function( map ){
+		if ( map.show instanceof Function ){
+			map.show();
+		}
+	};
+
+	renderMap( googleMap ); // 输出：开始渲染谷歌地图
+	renderMap( baiduMapAdapter ); // 输出：开始渲染百度地图
+
+	var getGuangdongCity = function(){
+		var guangdongCity = [
+			{
+				name: 'shenzhen',
+				id: 11,
+			}, {
+				name: 'guangzhou',
+				id: 12,
+			}
+		];
+		return guangdongCity;
+	};
+
+	var guangdongCity = {
+		shenzhen: 11,
+		guangzhou: 12,
+		zhuhai: 13
+	};
+
+	var render = function( fn ){
+		console.log( '开始渲染广东省地图' );
+		document.write( JSON.stringify( fn() ) );
+	};
+
+	var addressAdapter = function( oldAddressfn ){
+		var address = {},
+			oldAddress = oldAddressfn();
+		for ( var i = 0, c; c = oldAddress[ i++ ]; ){
+			address[ c.name ] = c.id;
+		}
+		return function(){
+			return address;
+		}
+	};
+
+	// render( getGuangdongCity );
+	render( addressAdapter( getGuangdongCity ) );
+
+
+</script>
+</body>
+</html>
